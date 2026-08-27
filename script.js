@@ -23,128 +23,58 @@ document.getElementById("reject").addEventListener("click", () => {
   localStorage.setItem("veykronis_cookie_choice", "rejected");
   banner.style.display = "none";
 });
-.reviews-section {
-  padding: 90px 20px;
-  background: #0a0a0a;
-  color: #fff;
-}
+const reviewForm = document.getElementById("reviewForm");
+const reviewsList = document.getElementById("reviewsList");
 
-.reviews-container {
-  max-width: 1100px;
-  margin: auto;
-}
+let reviews = JSON.parse(localStorage.getItem("ve ykronisReviews")) || [];
 
-.reviews-heading {
-  text-align: center;
-  margin-bottom: 45px;
-}
+function displayReviews() {
+  reviewsList.innerHTML = "";
 
-.section-tag {
-  font-size: 13px;
-  letter-spacing: 3px;
-  opacity: 0.7;
-  margin-bottom: 12px;
-}
-
-.reviews-heading h2 {
-  font-size: 42px;
-  margin: 0 0 12px;
-}
-
-.reviews-heading p:last-child {
-  color: #aaa;
-}
-
-.reviews-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 50px;
-}
-
-.review-card {
-  background: #151515;
-  border: 1px solid #292929;
-  border-radius: 16px;
-  padding: 25px;
-}
-
-.review-stars {
-  font-size: 20px;
-  letter-spacing: 3px;
-  margin-bottom: 15px;
-}
-
-.review-card p {
-  color: #ccc;
-  line-height: 1.6;
-}
-
-.review-card h4 {
-  margin-top: 20px;
-  margin-bottom: 0;
-}
-
-.review-form-box {
-  max-width: 650px;
-  margin: auto;
-  padding: 30px;
-  background: #151515;
-  border: 1px solid #292929;
-  border-radius: 18px;
-}
-
-.review-form-box h3 {
-  font-size: 26px;
-  margin-top: 0;
-  margin-bottom: 25px;
-}
-
-#reviewForm {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-#reviewForm input,
-#reviewForm select,
-#reviewForm textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #0d0d0d;
-  color: #fff;
-  font-size: 15px;
-  outline: none;
-}
-
-#reviewForm textarea {
-  resize: vertical;
-}
-
-#reviewForm button {
-  padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: #fff;
-  color: #000;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-#reviewForm button:hover {
-  opacity: 0.85;
-}
-
-@media (max-width: 800px) {
-  .reviews-list {
-    grid-template-columns: 1fr;
+  if (reviews.length === 0) {
+    reviewsList.innerHTML = `
+      <p style="text-align:center; color:#888; grid-column:1/-1;">
+        Be the first to leave a review.
+      </p>
+    `;
+    return;
   }
 
-  .reviews-heading h2 {
-    font-size: 32px;
-  }
-    }
+  reviews.forEach(review => {
+    const card = document.createElement("div");
+    card.className = "review-card";
+
+    card.innerHTML = `
+      <div class="review-stars">${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}</div>
+      <p>${review.text}</p>
+      <h4>${review.name}</h4>
+    `;
+
+    reviewsList.appendChild(card);
+  });
+}
+
+reviewForm.addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  const name = document.getElementById("reviewName").value.trim();
+  const rating = Number(document.getElementById("reviewRating").value);
+  const text = document.getElementById("reviewText").value.trim();
+
+  if (!name || !rating || !text) return;
+
+  reviews.push({
+    name: name,
+    rating: rating,
+    text: text
+  });
+
+  localStorage.setItem("veykronisReviews", JSON.stringify(reviews));
+
+  reviewForm.reset();
+  displayReviews();
+
+  alert("Thank you for your review!");
+});
+
+displayReviews();
